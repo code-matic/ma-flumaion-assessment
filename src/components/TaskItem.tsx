@@ -1,6 +1,21 @@
 import { TaskItemProps } from "@/@types/tasks";
 import { Pencil, Trash2 } from "lucide-react";
 
+// Helper function to format time in 12-hour format
+const formatTime = (time: string): string => {
+  if (!time) return "";
+
+  try {
+    const [hours, minutes] = time.split(":");
+    const hour = parseInt(hours, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const formattedHour = hour % 12 || 12;
+    return `${formattedHour}:${minutes} ${ampm}`;
+  } catch (error) {
+    return time; // Return original if parsing fails
+  }
+};
+
 const TaskItem = ({ task, onEdit, onDelete }: TaskItemProps) => {
   return (
     <div className="p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
@@ -13,6 +28,9 @@ const TaskItem = ({ task, onEdit, onDelete }: TaskItemProps) => {
           <p className="text-gray-600 mt-1">Assignee: {task.assignee}</p>
           <p className="text-gray-600 mt-1">Priority: {task.priority}</p>
           <p className="text-gray-600 mt-1">Due Date: {task.dueDate}</p>
+          <p className="text-gray-600 mt-1">
+            Time Slot: {formatTime(task.startTime)} - {formatTime(task.endTime)}
+          </p>
           <div className="mt-2 text-sm text-gray-500">
             <span className="mr-4">
               Created At: {new Date(task.createdAt).toLocaleString()}

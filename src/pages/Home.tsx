@@ -63,7 +63,7 @@ const Home = () => {
         </h2>
         <div className="flex flex-wrap justify-center gap-4">
           <Link
-            to="/scheduler"
+            to="/tasks"
             className="inline-block px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors duration-300"
           >
             Open Scheduler

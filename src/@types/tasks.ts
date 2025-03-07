@@ -6,12 +6,15 @@ export type Task = {
   dueDate: string;
   priority: string;
   assignee: string;
+  startTime: string;
+  endTime: string;
   createdAt: string;
   updatedAt: string;
 };
 
 export type TaskState = {
   tasks: Task[];
+  conflictError: string | null;
 };
 
 export type TaskItemProps = {

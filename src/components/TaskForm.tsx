@@ -12,8 +12,14 @@ import { TaskSchema, taskSchema } from "../zod_validation/taskSchema";
 import TextInput from "./input/text-input";
 import Select from "./input/select-input";
 import { Task } from "../@types/tasks";
-import { updateTask, addTask } from "@/reduxfeatures/taskSlice";
-import { useAppDispatch } from "../redux/storehook";
+import {
+  updateTask,
+  addTask,
+  clearConflictError,
+} from "@/reduxfeatures/taskSlice";
+import { useAppDispatch, useAppSelector } from "../redux/storehook";
+import { RootState } from "../redux/store";
+import React from "react";
 
 const statusOptions = [
   { name: "New", value: "new" },
@@ -31,11 +37,16 @@ const priorityOptions = [
 const TaskForm = ({
   initialData,
   onClose,
+  defaultDate,
 }: {
   initialData?: Task;
   onClose?: () => void;
+  defaultDate?: string;
 }) => {
   const dispatch = useAppDispatch();
+  const conflictError = useAppSelector(
+    (state: RootState) => state.task.conflictError
+  );
 
   const methods = useForm<TaskSchema>({
     resolver: zodResolver(taskSchema),
@@ -44,14 +55,26 @@ const TaskForm = ({
       name: initialData?.name || "",
       description: initialData?.description || "",
       status: initialData?.status || "New",
-      dueDate: initialData?.dueDate || "",
+      dueDate: initialData?.dueDate || defaultDate || "",
       priority: initialData?.priority || "Low",
       assignee: initialData?.assignee || "",
+      startTime: initialData?.startTime || "",
+      endTime: initialData?.endTime || "",
       createdAt: initialData?.createdAt || new Date().toISOString(),
       updatedAt: initialData?.updatedAt || new Date().toISOString(),
     },
     mode: "onBlur",
   });
+
+  // Clear conflict error when form values change
+  React.useEffect(() => {
+    const subscription = methods.watch(() => {
+      if (conflictError) {
+        dispatch(clearConflictError());
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [dispatch, conflictError, methods]);
 
   const onSubmit: SubmitHandler<TaskSchema> = async (values) => {
     // console.log("we got here", values);
@@ -95,6 +118,12 @@ const TaskForm = ({
         onSubmit={methods.handleSubmit(onSubmit, onError)}
         className="space-y-4"
       >
+        {conflictError && (
+          <div className="p-3 mb-4 text-sm text-red-700 bg-red-100 rounded-lg">
+            {conflictError}
+          </div>
+        )}
+
         <Controller
           control={methods.control}
           name="name"
@@ -202,6 +231,44 @@ const TaskForm = ({
             );
           }}
         />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Controller
+            control={methods.control}
+            name="startTime"
+            render={({ field: { onChange, value }, fieldState: { error } }) => {
+              return (
+                <TextInput
+                  name="startTime"
+                  label="Start Time"
+                  type="time"
+                  value={value}
+                  onChange={onChange}
+                  placeholder="Select start time"
+                  errorMessage={error?.message}
+                />
+              );
+            }}
+          />
+
+          <Controller
+            control={methods.control}
+            name="endTime"
+            render={({ field: { onChange, value }, fieldState: { error } }) => {
+              return (
+                <TextInput
+                  name="endTime"
+                  label="End Time"
+                  type="time"
+                  value={value}
+                  onChange={onChange}
+                  placeholder="Select end time"
+                  errorMessage={error?.message}
+                />
+              );
+            }}
+          />
+        </div>
 
         <div className="flex justify-end space-x-2">
           {onClose && (
