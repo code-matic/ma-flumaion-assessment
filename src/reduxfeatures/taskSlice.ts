@@ -59,12 +59,11 @@ export const taskSlice = createSlice({
       if (hasTimeConflict(state.tasks, action.payload)) {
         state.conflictError =
           "Time slot conflict: This time slot overlaps with an existing task";
-        return;
+      } else {
+        state.conflictError = null;
+        state.tasks.push(action.payload);
+        saveTasksToStorage(state.tasks);
       }
-
-      state.conflictError = null;
-      state.tasks.push(action.payload);
-      saveTasksToStorage(state.tasks);
     },
     deleteTask: (state: TaskState, action: PayloadAction<Task>) => {
       state.conflictError = null;
@@ -78,14 +77,13 @@ export const taskSlice = createSlice({
       if (hasTimeConflict(state.tasks, action.payload)) {
         state.conflictError =
           "Time slot conflict: This time slot overlaps with an existing task";
-        return;
+      } else {
+        state.conflictError = null;
+        state.tasks = state.tasks.map((task: Task) =>
+          task.id === action.payload.id ? action.payload : task
+        );
+        saveTasksToStorage(state.tasks);
       }
-
-      state.conflictError = null;
-      state.tasks = state.tasks.map((task: Task) =>
-        task.id === action.payload.id ? action.payload : task
-      );
-      saveTasksToStorage(state.tasks);
     },
     clearConflictError: (state: TaskState) => {
       state.conflictError = null;

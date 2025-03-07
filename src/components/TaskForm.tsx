@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import {
   Controller,
@@ -19,7 +20,6 @@ import {
 } from "@/reduxfeatures/taskSlice";
 import { useAppDispatch, useAppSelector } from "../redux/storehook";
 import { RootState } from "../redux/store";
-import React from "react";
 
 const statusOptions = [
   { name: "New", value: "new" },
@@ -47,6 +47,7 @@ const TaskForm = ({
   const conflictError = useAppSelector(
     (state: RootState) => state.task.conflictError
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const methods = useForm<TaskSchema>({
     resolver: zodResolver(taskSchema),
@@ -67,7 +68,7 @@ const TaskForm = ({
   });
 
   // Clear conflict error when form values change
-  React.useEffect(() => {
+  useEffect(() => {
     const subscription = methods.watch(() => {
       if (conflictError) {
         dispatch(clearConflictError());
@@ -76,8 +77,31 @@ const TaskForm = ({
     return () => subscription.unsubscribe();
   }, [dispatch, conflictError, methods]);
 
+  // Handle form submission result
+  useEffect(() => {
+    // Only run this effect when we're submitting and there's no conflict error
+    if (isSubmitting && !conflictError) {
+      toast.success(
+        initialData ? "Task updated successfully" : "Task created successfully"
+      );
+
+      // Close the form after successful submission
+      if (onClose) {
+        onClose();
+      }
+
+      // Reset submitting state
+      setIsSubmitting(false);
+    } else if (isSubmitting && conflictError) {
+      // If there's a conflict error, just reset the submitting state
+      setIsSubmitting(false);
+    }
+  }, [isSubmitting, conflictError, initialData, onClose]);
+
   const onSubmit: SubmitHandler<TaskSchema> = async (values) => {
-    // console.log("we got here", values);
+    // Set submitting state to true
+    setIsSubmitting(true);
+
     if (initialData) {
       // Update existing task
       dispatch(
@@ -88,10 +112,8 @@ const TaskForm = ({
           updatedAt: new Date().toISOString(),
         })
       );
-      toast.success("Task updated successfully");
     } else {
       // Create new task
-      // console.log("we got here 2", values);
       dispatch(
         addTask({
           ...values,
@@ -100,11 +122,6 @@ const TaskForm = ({
           updatedAt: new Date().toISOString(),
         })
       );
-      toast.success("Task created successfully");
-    }
-    // Close the form after submission
-    if (onClose) {
-      onClose();
     }
   };
 
