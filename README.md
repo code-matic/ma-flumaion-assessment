@@ -1,7 +1,7 @@
 # TaskMaster - Task Scheduler Application
 
 ![TaskMaster Logo](https://img.shields.io/badge/TaskMaster-Schedule%20with%20Ease-blue)
-![React](https://img.shields.io/badge/React-18.x-61DAFB?logo=react)
+![React](https://img.shields.io/badge/React-19.x-61DAFB?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)
 ![Redux](https://img.shields.io/badge/Redux-4.x-764ABC?logo=redux)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.x-38B2AC?logo=tailwind-css)
